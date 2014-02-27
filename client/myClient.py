@@ -31,13 +31,7 @@ opcodes = { 11: create_success,
 
 def getInput():
     print '''
-CONNECTED TO ATM SERVER - type the number of a function:
-    (1) Create Account
-    (2) Delete Account
-    (3) Deposit Money to an Account
-    (4) Withdraw Money from an Account
-    (5) Check the Balance of an Account
-    (6) End Session
+CONNECTED TO SERVER - type anything to write text on their wall
     '''
     netBuffer = raw_input('>> ')
     return netBuffer
@@ -117,7 +111,9 @@ if __name__ == '__main__':
     while True:
         netBuffer = getInput()
         #menu selection and function priming
-        processInput(netBuffer, mySocket)
-        getResponse(mySocket)
+        if(netBuffer == '6'):
+            processInput(netBuffer,mySocket)
+            getResponse(mySocket)
+        send_message(netBuffer, mySocket)
 
     mySocket.close()
