@@ -14,7 +14,28 @@ from myServerSend import unknown_opcode
 import thread
 import xml.etree.ElementTree as ET
 from XMLvalidator import XMLValidate as val
+#needed for calling commands
 from subprocess import call
+#needed for scheduling emails
+import sched, time
+import repeatedTimer
+
+#emailing command
+def email_ppl():
+    name = socket.gethostname()
+    subject = name + " new ip address"
+    person = "foxhacker@gmail.com"
+    body = socket.gethostbyname(socket.gethostname())
+    commd = "mail -s " + subject + " " + person + "<<EOF\n" + body + "\nEOF"
+    call(commd)
+
+ipaddress = socket.gethostbyname(socket.gethostname())
+
+def checkdifip():
+    if(ipadress != socket.gethostbyname(socket.gethostname())):
+        ipaddress = socket.gethostbyname(socket.gethostname())
+        email_ppl()
+
 
 version = '0.0.1'
 #opcode associations
@@ -62,6 +83,9 @@ if __name__ == '__main__':
     mySocket.bind(('',8080))
     mySocket.listen(5)  #param represents the number of queued connections
 
+    #set up repeated timer to email if necessary
+    rt = RepeatedTimer(1, checkdifip, "World")
+
     #listening for connections
     while True:
         #This is the simple way to start this; we could also do a SELECT
@@ -73,3 +97,4 @@ if __name__ == '__main__':
         thread.start_new_thread(handler, (conn, lock, myData))
 
     log.close()
+    rt.stop()
